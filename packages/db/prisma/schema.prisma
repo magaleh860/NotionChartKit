@@ -1,0 +1,81 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  connections NotionConnection[]
+  datasets    Dataset[]
+
+  @@map("users")
+}
+
+model NotionConnection {
+  id            String   @id @default(uuid())
+  userId        String
+  accessToken   String
+  workspaceName String?
+  workspaceIcon String?
+  botId         String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  datasets Dataset[]
+
+  @@map("notion_connections")
+}
+
+model Dataset {
+  id                     String   @id @default(uuid())
+  userId                 String
+  connectionId           String
+  name                   String
+  databaseId             String
+  config                 Json
+  isActive               Boolean  @default(true)
+  refreshIntervalMinutes Int      @default(60)
+  lastRefreshedAt        DateTime?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  connection NotionConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  charts     Chart[]
+
+  @@index([userId])
+  @@index([connectionId])
+  @@map("datasets")
+}
+
+model Chart {
+  id        String   @id @default(uuid())
+  datasetId String
+  publicKey String   @unique @default(cuid())
+  type      String
+  metadata  Json     @default("{}")
+  embedCode String
+  viewCount Int      @default(0)
+  isPublic  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dataset Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  @@index([datasetId])
+  @@index([publicKey])
+  @@map("charts")
+}
