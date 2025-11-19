@@ -3,14 +3,10 @@ import { prisma } from '@notionchartkit/db';
 import { CreateChartSchema } from '@notionchartkit/contracts';
 import { ZodError } from 'zod';
 
-// GET /api/charts/:id - Get chart data
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+// GET /api/charts - List all charts
+export async function GET(_request: NextRequest) {
   try {
-    const { id } = params;
-
-    // Fetch chart with associated dataset
-    const chart = await prisma.chart.findUnique({
-      where: { id },
+    const charts = await prisma.chart.findMany({
       include: {
         dataset: {
           include: {
@@ -18,29 +14,15 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
           },
         },
       },
-    });
-
-    if (!chart) {
-      return NextResponse.json({ error: 'Chart not found' }, { status: 404 });
-    }
-
-    // TODO: Fetch actual data from Redis cache or regenerate from Notion
-    // For now, return the chart metadata
-    return NextResponse.json({
-      id: chart.id,
-      publicKey: chart.publicKey,
-      type: chart.type,
-      data: [], // Will be populated from cache/Notion
-      metadata: chart.metadata,
-      dataset: {
-        id: chart.dataset.id,
-        name: chart.dataset.name,
-        databaseId: chart.dataset.databaseId,
+      orderBy: {
+        createdAt: 'desc',
       },
     });
+
+    return NextResponse.json({ charts });
   } catch (error) {
-    console.error('Failed to fetch chart:', error);
-    return NextResponse.json({ error: 'Failed to fetch chart' }, { status: 500 });
+    console.error('Failed to fetch charts:', error);
+    return NextResponse.json({ error: 'Failed to fetch charts' }, { status: 500 });
   }
 }
 
