@@ -8,8 +8,17 @@ export async function GET(_request: NextRequest) {
   try {
     const datasets = await prisma.dataset.findMany({
       include: {
-        connection: true,
-        charts: true,
+        connection: {
+          select: {
+            workspaceName: true,
+            workspaceIcon: true,
+          },
+        },
+        _count: {
+          select: {
+            charts: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
