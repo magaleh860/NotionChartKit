@@ -3,6 +3,9 @@ import { prisma } from '@notionchartkit/db';
 import { getServerSession } from 'next-auth';
 import { type NextRequest, NextResponse } from 'next/server';
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 // GET /api/notion/databases - List user's accessible Notion databases
 export async function GET(_request: NextRequest) {
   try {

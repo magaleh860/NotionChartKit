@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 interface Dataset {
   id: string;
@@ -11,7 +11,7 @@ interface Dataset {
 
 type ChartType = 'bar' | 'line' | 'pie' | 'area';
 
-export default function CreateChartPage() {
+function CreateChartContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -265,5 +265,19 @@ export default function CreateChartPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function CreateChartPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+      }
+    >
+      <CreateChartContent />
+    </Suspense>
   );
 }
