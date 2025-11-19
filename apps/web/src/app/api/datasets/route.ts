@@ -31,8 +31,12 @@ export async function POST(request: NextRequest) {
     // Validate request body with Zod schema
     const validatedData = CreateDatasetSchema.parse(body);
 
-    // TODO: Get userId from session (once auth is implemented)
-    const userId = 'temp-user-id'; // Placeholder until auth is implemented
+    // Get userId from request body (sent from client with session data)
+    const userId = body.userId as string;
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized - userId required' }, { status: 401 });
+    }
 
     // Create dataset in database
     const dataset = await prisma.dataset.create({
