@@ -1,5 +1,6 @@
 'use client';
 
+import { ChartList } from '@/components/chart-list';
 import { DatasetCreationForm } from '@/components/dataset-creation-form';
 import { DatasetList } from '@/components/dataset-list';
 import { signOut, useSession } from 'next-auth/react';
@@ -66,7 +67,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Dataset List */}
-        <DatasetList />
+        <div className="mb-12">
+          <DatasetList />
+        </div>
+
+        {/* Chart List */}
+        <ChartList />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 interface Dataset {
@@ -19,6 +20,7 @@ interface Dataset {
 }
 
 export function DatasetList() {
+  const router = useRouter();
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -141,8 +143,7 @@ export function DatasetList() {
                 type="button"
                 className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors"
                 onClick={() => {
-                  // TODO: Navigate to create chart from this dataset
-                  alert(`Create chart from: ${dataset.name}`);
+                  router.push(`/charts/create?datasetId=${dataset.id}`);
                 }}
               >
                 Create Chart
