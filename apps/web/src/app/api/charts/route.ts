@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@notionchartkit/db';
 import { CreateChartSchema } from '@notionchartkit/contracts';
+import { prisma } from '@notionchartkit/db';
+import { type NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
 // GET /api/charts - List all charts
@@ -30,7 +30,7 @@ export async function GET(_request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     // Validate request body with Zod schema
     const validatedData = CreateChartSchema.parse(body);
 
@@ -67,12 +67,15 @@ export async function POST(request: NextRequest) {
       data: { embedCode: updatedEmbedCode },
     });
 
-    return NextResponse.json({ 
-      chart: {
-        ...chart,
-        embedCode: updatedEmbedCode,
-      }
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        chart: {
+          ...chart,
+          embedCode: updatedEmbedCode,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -80,7 +83,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     console.error('Failed to create chart:', error);
     return NextResponse.json({ error: 'Failed to create chart' }, { status: 500 });
   }
