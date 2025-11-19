@@ -1,24 +1,35 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-interface Dataset {
+interface Chart {
   id: string;
-  name: string;
-  databaseId: string;
+  type: string;
+  metadata: {
+    title?: string;
+    xAxisLabel?: string;
+    yAxisLabel?: string;
+    groupByProperty?: string;
+    aggregationType?: 'count' | 'sum' | 'avg';
+    valueProperty?: string;
+  };
+  isPublic: boolean;
+  dataset: {
+    id: string;
+    name: string;
+  };
 }
 
 type ChartType = 'bar' | 'line' | 'pie' | 'area';
 
-function CreateChartContent() {
+export default function EditChartPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const { id } = params;
 
-  const datasetId = searchParams.get('datasetId');
-  const [dataset, setDataset] = useState<Dataset | null>(null);
+  const [chart, setChart] = useState<Chart | null>(null);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Form state
@@ -39,45 +50,49 @@ function CreateChartContent() {
   >([]);
   const [loadingProperties, setLoadingProperties] = useState(false);
 
-  // Fetch dataset info
+  // Fetch chart data
   useEffect(() => {
-    async function fetchDataset() {
-      if (!datasetId) {
-        setError('No dataset ID provided');
-        setLoading(false);
-        return;
-      }
-
+    async function fetchChart() {
       try {
-        const response = await fetch('/api/datasets');
-        if (!response.ok) throw new Error('Failed to fetch datasets');
+        setLoading(true);
+        const response = await fetch(`/api/charts/${id}`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch chart');
+        }
 
         const data = await response.json();
-        const found = data.datasets.find((d: Dataset) => d.id === datasetId);
+        setChart(data);
 
-        if (!found) {
-          setError('Dataset not found');
-        } else {
-          setDataset(found);
-          setTitle(`${found.name} Chart`);
-          // Fetch available properties
-          fetchProperties(found.id);
+        // Populate form with existing values
+        setChartType(data.type as ChartType);
+        setTitle(data.metadata?.title || '');
+        setXAxisLabel(data.metadata?.xAxisLabel || '');
+        setYAxisLabel(data.metadata?.yAxisLabel || '');
+        setIsPublic(data.isPublic);
+        setGroupByProperty(data.metadata?.groupByProperty || '');
+        setAggregationType(data.metadata?.aggregationType || 'count');
+        setValueProperty(data.metadata?.valueProperty || '');
+
+        // Fetch available properties from the dataset
+        if (data.dataset?.id) {
+          fetchProperties(data.dataset.id);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load dataset');
+        setError(err instanceof Error ? err.message : 'Failed to load chart');
       } finally {
         setLoading(false);
       }
     }
 
-    fetchDataset();
-  }, [datasetId]);
+    fetchChart();
+  }, [id]);
 
   // Fetch available properties from Notion database
-  async function fetchProperties(dsId: string) {
+  async function fetchProperties(datasetId: string) {
     try {
       setLoadingProperties(true);
-      const response = await fetch(`/api/datasets/${dsId}/properties`);
+      const response = await fetch(`/api/datasets/${datasetId}/properties`);
 
       if (response.ok) {
         const data = await response.json();
@@ -93,22 +108,16 @@ function CreateChartContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!datasetId) {
-      setError('No dataset selected');
-      return;
-    }
-
     try {
-      setCreating(true);
+      setSaving(true);
       setError(null);
 
-      const response = await fetch('/api/charts', {
-        method: 'POST',
+      const response = await fetch(`/api/charts/${id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          datasetId,
           type: chartType,
           metadata: {
             title: title || undefined,
@@ -124,31 +133,30 @@ function CreateChartContent() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create chart');
+        throw new Error(errorData.error || 'Failed to update chart');
       }
 
-      await response.json();
-      alert('Chart created successfully!');
+      alert('Chart updated successfully!');
 
       // Redirect to dashboard
       router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create chart');
-      console.error('Error creating chart:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update chart');
+      console.error('Error updating chart:', err);
     } finally {
-      setCreating(false);
+      setSaving(false);
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+        <p>Loading chart...</p>
       </div>
     );
   }
 
-  if (error && !dataset) {
+  if (error && !chart) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -176,10 +184,10 @@ function CreateChartContent() {
           >
             ← Back to Dashboard
           </button>
-          <h1 className="text-4xl font-bold">Create Chart</h1>
-          {dataset && (
+          <h1 className="text-4xl font-bold">Edit Chart</h1>
+          {chart && (
             <p className="text-gray-600 mt-2">
-              From dataset: <span className="font-semibold">{dataset.name}</span>
+              From dataset: <span className="font-semibold">{chart.dataset.name}</span>
             </p>
           )}
         </div>
@@ -226,7 +234,7 @@ function CreateChartContent() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Sales Overview"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={creating}
+              disabled={saving}
             />
           </div>
 
@@ -242,7 +250,7 @@ function CreateChartContent() {
               onChange={(e) => setXAxisLabel(e.target.value)}
               placeholder="e.g., Month"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={creating}
+              disabled={saving}
             />
           </div>
 
@@ -258,7 +266,7 @@ function CreateChartContent() {
               onChange={(e) => setYAxisLabel(e.target.value)}
               placeholder="e.g., Revenue ($)"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={creating}
+              disabled={saving}
             />
           </div>
 
@@ -281,7 +289,7 @@ function CreateChartContent() {
                   value={groupByProperty}
                   onChange={(e) => setGroupByProperty(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={creating}
+                  disabled={saving}
                 >
                   <option value="">Select a property...</option>
                   {availableProperties.map((prop) => (
@@ -298,7 +306,7 @@ function CreateChartContent() {
                   onChange={(e) => setGroupByProperty(e.target.value)}
                   placeholder="e.g., Status, Category, Date"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={creating}
+                  disabled={saving}
                 />
               )}
               <p className="text-xs text-gray-500 mt-1">
@@ -319,7 +327,7 @@ function CreateChartContent() {
                 value={aggregationType}
                 onChange={(e) => setAggregationType(e.target.value as 'count' | 'sum' | 'avg')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={creating}
+                disabled={saving}
               >
                 <option value="count">Count - Count number of records</option>
                 <option value="sum">Sum - Add up numeric values</option>
@@ -342,7 +350,7 @@ function CreateChartContent() {
                     value={valueProperty}
                     onChange={(e) => setValueProperty(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={creating}
+                    disabled={saving}
                   >
                     <option value="">Select a numeric property...</option>
                     {availableProperties
@@ -361,7 +369,7 @@ function CreateChartContent() {
                     onChange={(e) => setValueProperty(e.target.value)}
                     placeholder="e.g., Amount, Price, Revenue"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={creating}
+                    disabled={saving}
                   />
                 )}
                 <p className="text-xs text-gray-500 mt-1">
@@ -379,7 +387,7 @@ function CreateChartContent() {
               checked={isPublic}
               onChange={(e) => setIsPublic(e.target.checked)}
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              disabled={creating}
+              disabled={saving}
             />
             <label htmlFor="isPublic" className="text-sm font-medium text-gray-700">
               Make this chart public (can be embedded)
@@ -392,34 +400,20 @@ function CreateChartContent() {
               type="button"
               onClick={() => router.push('/dashboard')}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              disabled={creating}
+              disabled={saving}
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={creating || !datasetId}
+              disabled={saving}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
-              {creating ? 'Creating...' : 'Create Chart'}
+              {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
-}
-
-export default function CreateChartPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <p>Loading...</p>
-        </div>
-      }
-    >
-      <CreateChartContent />
-    </Suspense>
   );
 }

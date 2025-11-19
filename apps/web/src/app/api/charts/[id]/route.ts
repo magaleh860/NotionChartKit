@@ -24,14 +24,13 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: 'Chart not found' }, { status: 404 });
     }
 
-    // TODO: Fetch actual data from Redis cache or regenerate from Notion
-    // For now, return the chart metadata
+    // Return chart with full metadata
     return NextResponse.json({
       id: chart.id,
       publicKey: chart.publicKey,
       type: chart.type,
-      data: [], // Will be populated from cache/Notion
       metadata: chart.metadata,
+      isPublic: chart.isPublic,
       dataset: {
         id: chart.dataset.id,
         name: chart.dataset.name,
@@ -41,6 +40,41 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
   } catch (error) {
     console.error('Failed to fetch chart:', error);
     return NextResponse.json({ error: 'Failed to fetch chart' }, { status: 500 });
+  }
+}
+
+// PATCH /api/charts/:id - Update chart
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const { id } = params;
+    const body = await request.json();
+
+    // Check if chart exists
+    const existingChart = await prisma.chart.findUnique({
+      where: { id },
+    });
+
+    if (!existingChart) {
+      return NextResponse.json({ error: 'Chart not found' }, { status: 404 });
+    }
+
+    // Update chart
+    const chart = await prisma.chart.update({
+      where: { id },
+      data: {
+        type: body.type,
+        metadata: body.metadata || {},
+        isPublic: body.isPublic,
+      },
+      include: {
+        dataset: true,
+      },
+    });
+
+    return NextResponse.json({ chart });
+  } catch (error) {
+    console.error('Failed to update chart:', error);
+    return NextResponse.json({ error: 'Failed to update chart' }, { status: 500 });
   }
 }
 

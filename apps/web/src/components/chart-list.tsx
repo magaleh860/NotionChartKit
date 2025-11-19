@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { ChartRenderer } from './chart-renderer';
 
 interface Chart {
   id: string;
@@ -85,6 +86,11 @@ export function ChartList() {
             key={chart.id}
             className="p-4 border rounded-lg bg-white hover:shadow-md transition-shadow"
           >
+            {/* Chart Preview */}
+            <div className="mb-3 h-48 bg-gray-50 rounded border overflow-hidden">
+              <ChartRenderer chartId={chart.id} height={192} showTitle={false} />
+            </div>
+
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -129,6 +135,15 @@ export function ChartList() {
             </div>
 
             <div className="flex gap-2">
+              <button
+                type="button"
+                className="flex-1 px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  router.push(`/charts/${chart.id}/edit`);
+                }}
+              >
+                Edit
+              </button>
               <button
                 type="button"
                 className="flex-1 px-3 py-1.5 text-sm text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
