@@ -34,6 +34,7 @@ export async function refreshDatasets() {
         const data = await fetchNotionData(
           dataset.connection.accessToken,
           dataset.databaseId,
+          // biome-ignore lint/suspicious/noExplicitAny: Dataset config JSON type from database
           dataset.config as any
         );
 

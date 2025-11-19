@@ -1,6 +1,7 @@
 import type { AggregationConfig } from '../types.js';
 
 export function aggregateData(
+  // biome-ignore lint/suspicious/noExplicitAny: Normalized data has dynamic property values
   data: Array<Record<string, any>>,
   config: AggregationConfig
 ): Array<{ name: string; value: number }> {
@@ -13,19 +14,20 @@ export function aggregateData(
   }
 
   // Group data by field
+  // biome-ignore lint/suspicious/noExplicitAny: Group data has dynamic property values
   const groups = new Map<string, any[]>();
-  
+
   for (const row of data) {
     const groupValue = String(row[groupBy] || 'Unknown');
     if (!groups.has(groupValue)) {
       groups.set(groupValue, []);
     }
-    groups.get(groupValue)!.push(row);
+    groups.get(groupValue)?.push(row);
   }
 
   // Calculate aggregate for each group
   const result: Array<{ name: string; value: number }> = [];
-  
+
   for (const [name, groupData] of groups.entries()) {
     const value = calculateAggregate(groupData, aggregateField, aggregationType);
     result.push({ name, value });
@@ -35,6 +37,7 @@ export function aggregateData(
 }
 
 function calculateAggregate(
+  // biome-ignore lint/suspicious/noExplicitAny: Normalized data has dynamic property values
   data: Array<Record<string, any>>,
   field: string | undefined,
   type: 'sum' | 'count' | 'avg' | 'min' | 'max'
@@ -47,9 +50,7 @@ function calculateAggregate(
     throw new Error('Aggregate field required for non-count aggregations');
   }
 
-  const values = data
-    .map((row) => row[field])
-    .filter((val) => typeof val === 'number');
+  const values = data.map((row) => row[field]).filter((val) => typeof val === 'number');
 
   if (values.length === 0) return 0;
 

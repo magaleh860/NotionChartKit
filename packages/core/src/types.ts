@@ -1,11 +1,14 @@
 export interface NotionDataConfig {
   databaseId: string;
+  // biome-ignore lint/suspicious/noExplicitAny: Notion API filter types are complex, using any for flexibility
   filters?: any;
+  // biome-ignore lint/suspicious/noExplicitAny: Notion API sort types are complex, using any for flexibility
   sorts?: any;
 }
 
 export interface NormalizedRow {
   id: string;
+  // biome-ignore lint/suspicious/noExplicitAny: Notion property types vary dynamically
   properties: Record<string, any>;
   createdTime: string;
   lastEditedTime: string;
@@ -22,6 +25,7 @@ export interface ChartData {
   data: Array<{
     name: string;
     value: number;
+    // biome-ignore lint/suspicious/noExplicitAny: Chart data can have dynamic fields
     [key: string]: any;
   }>;
   metadata: {
