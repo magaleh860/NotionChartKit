@@ -1,0 +1,51 @@
+### NotionChartKit API Tests
+
+@baseUrl = http://localhost:3000
+
+### Get all datasets
+GET {{baseUrl}}/api/datasets
+
+### Get all charts
+GET {{baseUrl}}/api/charts
+
+### Create dataset (will fail - no user/connection exists)
+POST {{baseUrl}}/api/datasets
+Content-Type: application/json
+
+{
+  "name": "My Test Dataset",
+  "databaseId": "notion-db-id-123",
+  "connectionId": "00000000-0000-0000-0000-000000000000",
+  "config": {
+    "databaseId": "notion-db-id-123",
+    "groupBy": "status",
+    "aggregationType": "count"
+  },
+  "refreshIntervalMinutes": 60
+}
+
+### Create dataset (validation error - missing required fields)
+POST {{baseUrl}}/api/datasets
+Content-Type: application/json
+
+{
+  "name": "Invalid Dataset"
+}
+
+### Create chart (will fail - no dataset exists)
+POST {{baseUrl}}/api/charts
+Content-Type: application/json
+
+{
+  "datasetId": "00000000-0000-0000-0000-000000000000",
+  "type": "bar",
+  "metadata": {
+    "title": "My Chart",
+    "xAxisLabel": "Category",
+    "yAxisLabel": "Count"
+  },
+  "isPublic": true
+}
+
+### Get specific chart (will fail - no chart exists)
+GET {{baseUrl}}/api/charts/00000000-0000-0000-0000-000000000000
