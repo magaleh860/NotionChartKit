@@ -122,6 +122,7 @@ export const authOptions: NextAuthOptions = {
       // Add custom fields to session
       if (session.user && token.dbUserId) {
         session.user.id = token.dbUserId as string;
+        session.user.dbUserId = token.dbUserId as string;
         session.user.connectionId = token.connectionId as string;
       }
       return session;

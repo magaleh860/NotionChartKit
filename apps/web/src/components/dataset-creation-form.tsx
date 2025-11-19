@@ -75,7 +75,9 @@ export function DatasetCreationForm() {
           databaseId: selectedDatabaseId,
           connectionId: session?.user?.connectionId,
           userId: session?.user?.dbUserId,
-          config: {},
+          config: {
+            databaseId: selectedDatabaseId,
+          },
           refreshIntervalMinutes: 60,
         }),
       });
