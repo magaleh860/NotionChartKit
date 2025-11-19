@@ -1,7 +1,9 @@
 import type { NormalizedRow } from '../types.js';
 
+// biome-ignore lint/suspicious/noExplicitAny: Notion property values are dynamic
 export function normalizeData(rows: NormalizedRow[]): Array<Record<string, any>> {
   return rows.map((row) => {
+    // biome-ignore lint/suspicious/noExplicitAny: Notion property values are dynamic
     const normalized: Record<string, any> = {
       id: row.id,
       createdTime: row.createdTime,
@@ -17,6 +19,7 @@ export function normalizeData(rows: NormalizedRow[]): Array<Record<string, any>>
   });
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: Notion property structure varies by type
 function extractPropertyValue(property: any): any {
   if (!property) return null;
 
@@ -30,6 +33,7 @@ function extractPropertyValue(property: any): any {
     case 'select':
       return property.select?.name || null;
     case 'multi_select':
+      // biome-ignore lint/suspicious/noExplicitAny: Notion multi_select item structure
       return property.multi_select?.map((s: any) => s.name) || [];
     case 'date':
       return property.date?.start || null;
@@ -44,8 +48,10 @@ function extractPropertyValue(property: any): any {
     case 'status':
       return property.status?.name || null;
     case 'people':
+      // biome-ignore lint/suspicious/noExplicitAny: Notion people item structure
       return property.people?.map((p: any) => p.name) || [];
     case 'files':
+      // biome-ignore lint/suspicious/noExplicitAny: Notion file item structure
       return property.files?.map((f: any) => f.name) || [];
     case 'created_time':
       return property.created_time;

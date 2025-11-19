@@ -57,7 +57,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check formatting
-        run: pnpm exec biome format --check .
+        run: pnpm exec biome check --formatter-enabled=true --linter-enabled=false .
 
   type-check:
     name: Type Check

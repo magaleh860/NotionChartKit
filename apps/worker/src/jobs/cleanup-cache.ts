@@ -8,13 +8,14 @@ export async function cleanupCache() {
 
     // Get all dataset keys
     const keys = await redis.keys('dataset:*:data');
-    
+
     let cleaned = 0;
     for (const key of keys) {
       const ttl = await redis.ttl(key);
-      
+
       // Remove expired or very old cache entries
-      if (ttl < 0 || ttl > 7200) { // older than 2 hours
+      if (ttl < 0 || ttl > 7200) {
+        // older than 2 hours
         await redis.del(key);
         cleaned++;
       }

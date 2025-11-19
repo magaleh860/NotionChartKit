@@ -1,5 +1,5 @@
 import { Client } from '@notionhq/client';
-import type { NotionDataConfig, NormalizedRow } from '../types.js';
+import type { NormalizedRow, NotionDataConfig } from '../types.js';
 
 export async function fetchNotionData(
   accessToken: string,
@@ -15,6 +15,7 @@ export async function fetchNotionData(
       sorts: config.sorts,
     });
 
+    // biome-ignore lint/suspicious/noExplicitAny: Notion API response type
     return response.results.map((page: any) => ({
       id: page.id,
       properties: page.properties,

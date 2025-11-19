@@ -1,13 +1,13 @@
 import 'dotenv/config';
-import { refreshDatasets } from './jobs/refresh-datasets.js';
 import { cleanupCache } from './jobs/cleanup-cache.js';
+import { refreshDatasets } from './jobs/refresh-datasets.js';
 
 console.log('🚀 NotionChartKit Worker started');
 
 // Main worker loop
 async function main() {
-  const REFRESH_INTERVAL = parseInt(process.env.REFRESH_INTERVAL || '300000'); // 5 minutes default
-  const CLEANUP_INTERVAL = parseInt(process.env.CLEANUP_INTERVAL || '3600000'); // 1 hour default
+  const REFRESH_INTERVAL = Number.parseInt(process.env.REFRESH_INTERVAL || '300000'); // 5 minutes default
+  const CLEANUP_INTERVAL = Number.parseInt(process.env.CLEANUP_INTERVAL || '3600000'); // 1 hour default
 
   // Run refresh job
   setInterval(async () => {

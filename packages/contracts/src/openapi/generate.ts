@@ -1,15 +1,15 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import * as fs from 'fs';
-import * as path from 'path';
 import {
-  UserSchema,
-  NotionConnectionSchema,
-  DatasetSchema,
   ChartSchema,
-  CreateUserSchema,
-  CreateNotionConnectionSchema,
-  CreateDatasetSchema,
   CreateChartSchema,
+  CreateDatasetSchema,
+  CreateNotionConnectionSchema,
+  CreateUserSchema,
+  DatasetSchema,
+  NotionConnectionSchema,
+  UserSchema,
 } from '../index.js';
 
 const schemas = {
@@ -37,10 +37,14 @@ const openApiSpec = {
     },
   ],
   components: {
-    schemas: Object.entries(schemas).reduce((acc, [name, schema]) => {
-      acc[name] = zodToJsonSchema(schema, name);
-      return acc;
-    }, {} as Record<string, any>),
+    schemas: Object.entries(schemas).reduce(
+      (acc, [name, schema]) => {
+        acc[name] = zodToJsonSchema(schema, name);
+        return acc;
+      },
+      // biome-ignore lint/suspicious/noExplicitAny: OpenAPI schema can have dynamic structure
+      {} as Record<string, any>
+    ),
   },
   paths: {
     '/api/datasets': {
