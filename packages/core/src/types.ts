@@ -18,6 +18,13 @@ export interface AggregationConfig {
   groupBy?: string;
   aggregateField?: string;
   aggregationType?: 'sum' | 'count' | 'avg' | 'min' | 'max';
+  // Time window filtering
+  timeWindow?: {
+    type: 'last_7_days' | 'last_30_days' | 'last_90_days' | 'last_year' | 'custom';
+    dateProperty?: string; // Which date property to filter on (defaults to 'createdTime')
+    customStartDate?: string; // For custom time windows (ISO string)
+    customEndDate?: string; // For custom time windows (ISO string)
+  };
 }
 
 export interface ChartData {

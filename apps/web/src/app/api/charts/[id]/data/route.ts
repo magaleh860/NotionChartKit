@@ -50,6 +50,12 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
       groupByProperty?: string;
       aggregationType?: 'count' | 'sum' | 'avg' | 'min' | 'max';
       valueProperty?: string;
+      timeWindow?: {
+        type: 'last_7_days' | 'last_30_days' | 'last_90_days' | 'last_year' | 'custom';
+        dateProperty?: string;
+        customStartDate?: string;
+        customEndDate?: string;
+      };
     } | null;
 
     // Apply aggregation based on chart configuration
@@ -57,6 +63,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
       groupBy: metadata?.groupByProperty,
       aggregationType: metadata?.aggregationType || 'count',
       aggregateField: metadata?.valueProperty,
+      timeWindow: metadata?.timeWindow,
     });
 
     // Format for Chart.js

@@ -13,6 +13,12 @@ interface Chart {
     groupByProperty?: string;
     aggregationType?: 'count' | 'sum' | 'avg';
     valueProperty?: string;
+    timeWindow?: {
+      type: 'last_7_days' | 'last_30_days' | 'last_90_days' | 'last_year' | 'custom';
+      dateProperty?: string;
+      customStartDate?: string;
+      customEndDate?: string;
+    };
   };
   isPublic: boolean;
   dataset: {
@@ -44,6 +50,15 @@ export default function EditChartPage({ params }: { params: { id: string } }) {
   const [aggregationType, setAggregationType] = useState<'count' | 'sum' | 'avg'>('count');
   const [valueProperty, setValueProperty] = useState('');
 
+  // Time window state
+  const [enableTimeWindow, setEnableTimeWindow] = useState(false);
+  const [timeWindowType, setTimeWindowType] = useState<
+    'last_7_days' | 'last_30_days' | 'last_90_days' | 'last_year' | 'custom'
+  >('last_30_days');
+  const [dateProperty, setDateProperty] = useState('createdTime');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+
   // Available properties from Notion
   const [availableProperties, setAvailableProperties] = useState<
     Array<{ name: string; type: string }>
@@ -73,6 +88,15 @@ export default function EditChartPage({ params }: { params: { id: string } }) {
         setGroupByProperty(data.metadata?.groupByProperty || '');
         setAggregationType(data.metadata?.aggregationType || 'count');
         setValueProperty(data.metadata?.valueProperty || '');
+
+        // Populate time window values if they exist
+        if (data.metadata?.timeWindow) {
+          setEnableTimeWindow(true);
+          setTimeWindowType(data.metadata.timeWindow.type);
+          setDateProperty(data.metadata.timeWindow.dateProperty || 'createdTime');
+          setCustomStartDate(data.metadata.timeWindow.customStartDate || '');
+          setCustomEndDate(data.metadata.timeWindow.customEndDate || '');
+        }
 
         // Fetch available properties from the dataset
         if (data.dataset?.id) {
@@ -126,6 +150,18 @@ export default function EditChartPage({ params }: { params: { id: string } }) {
             groupByProperty: groupByProperty || undefined,
             aggregationType,
             valueProperty: valueProperty || undefined,
+            timeWindow: enableTimeWindow
+              ? {
+                  type: timeWindowType,
+                  dateProperty: dateProperty || 'createdTime',
+                  ...(timeWindowType === 'custom'
+                    ? {
+                        customStartDate: customStartDate || undefined,
+                        customEndDate: customEndDate || undefined,
+                      }
+                    : {}),
+                }
+              : undefined,
           },
           isPublic,
         }),
@@ -354,10 +390,10 @@ export default function EditChartPage({ params }: { params: { id: string } }) {
                   >
                     <option value="">Select a numeric property...</option>
                     {availableProperties
-                      .filter((prop) => prop.type === 'number')
+                      .filter((prop) => prop.type === 'number' || prop.type === 'relation')
                       .map((prop) => (
                         <option key={prop.name} value={prop.name}>
-                          {prop.name}
+                          {prop.name} ({prop.type === 'relation' ? 'relation count' : prop.type})
                         </option>
                       ))}
                   </select>
@@ -373,8 +409,113 @@ export default function EditChartPage({ params }: { params: { id: string } }) {
                   />
                 )}
                 <p className="text-xs text-gray-500 mt-1">
-                  Select the numeric property to {aggregationType === 'sum' ? 'sum' : 'average'}
+                  Select the numeric or relation property to{' '}
+                  {aggregationType === 'sum' ? 'sum' : 'average'}
                 </p>
+              </div>
+            )}
+          </div>
+
+          {/* Time Window Filter */}
+          <div className="border-t pt-6">
+            <div className="flex items-center gap-3 mb-4">
+              <input
+                type="checkbox"
+                id="enableTimeWindow"
+                checked={enableTimeWindow}
+                onChange={(e) => setEnableTimeWindow(e.target.checked)}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                disabled={saving}
+              />
+              <label htmlFor="enableTimeWindow" className="text-sm font-medium text-gray-700">
+                Filter data by time window
+              </label>
+            </div>
+
+            {enableTimeWindow && (
+              <div className="ml-7 space-y-4 p-4 bg-gray-50 rounded-lg">
+                {/* Time Window Type */}
+                <div>
+                  <label
+                    htmlFor="timeWindowType"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Time Range
+                  </label>
+                  <select
+                    id="timeWindowType"
+                    value={timeWindowType}
+                    onChange={(e) => setTimeWindowType(e.target.value as typeof timeWindowType)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled={saving}
+                  >
+                    <option value="last_7_days">Last 7 days</option>
+                    <option value="last_30_days">Last 30 days</option>
+                    <option value="last_90_days">Last 90 days</option>
+                    <option value="last_year">Last year</option>
+                    <option value="custom">Custom range</option>
+                  </select>
+                </div>
+
+                {/* Date Property */}
+                <div>
+                  <label
+                    htmlFor="dateProperty"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Date Property
+                  </label>
+                  <select
+                    id="dateProperty"
+                    value={dateProperty}
+                    onChange={(e) => setDateProperty(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled={saving}
+                  >
+                    <option value="createdTime">Created Time</option>
+                    <option value="lastEditedTime">Last Edited Time</option>
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500">Which date field to filter on</p>
+                </div>
+
+                {/* Custom Date Range */}
+                {timeWindowType === 'custom' && (
+                  <div className="space-y-3">
+                    <div>
+                      <label
+                        htmlFor="customStartDate"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Start Date
+                      </label>
+                      <input
+                        type="date"
+                        id="customStartDate"
+                        value={customStartDate}
+                        onChange={(e) => setCustomStartDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={saving}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="customEndDate"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        End Date (Optional)
+                      </label>
+                      <input
+                        type="date"
+                        id="customEndDate"
+                        value={customEndDate}
+                        onChange={(e) => setCustomEndDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={saving}
+                      />
+                      <p className="mt-1 text-xs text-gray-500">Leave empty to use current date</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
