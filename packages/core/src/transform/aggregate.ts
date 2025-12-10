@@ -5,12 +5,17 @@ export function aggregateData(
   data: Array<Record<string, any>>,
   config: AggregationConfig
 ): Array<{ name: string; value: number }> {
-  const { groupBy, aggregateField, aggregationType = 'count', timeWindow } = config;
+  const { groupBy, aggregateField, aggregationType = 'count', timeWindow, filters } = config;
+
+  // Apply property filters if specified
+  let filteredData = data;
+  if (filters && filters.length > 0) {
+    filteredData = filterByProperties(data, filters);
+  }
 
   // Apply time window filter if specified
-  let filteredData = data;
   if (timeWindow) {
-    filteredData = filterByTimeWindow(data, timeWindow);
+    filteredData = filterByTimeWindow(filteredData, timeWindow);
   }
 
   if (!groupBy) {
@@ -78,6 +83,94 @@ function calculateAggregate(
     default:
       return 0;
   }
+}
+
+function filterByProperties(
+  // biome-ignore lint/suspicious/noExplicitAny: Normalized data has dynamic property values
+  data: Array<Record<string, any>>,
+  filters: NonNullable<AggregationConfig['filters']>
+  // biome-ignore lint/suspicious/noExplicitAny: Return type matches input type with dynamic properties
+): Array<Record<string, any>> {
+  return data.filter((row) => {
+    // All filters must match (AND logic)
+    return filters.every((filter) => {
+      const value = row[filter.property];
+      const filterValue = filter.value;
+
+      switch (filter.operator) {
+        case 'equals':
+          // Handle case-insensitive string comparison
+          if (typeof value === 'string' && typeof filterValue === 'string') {
+            return value.toLowerCase() === filterValue.toLowerCase();
+          }
+          return value === filterValue;
+
+        case 'not_equals':
+          if (typeof value === 'string' && typeof filterValue === 'string') {
+            return value.toLowerCase() !== filterValue.toLowerCase();
+          }
+          return value !== filterValue;
+
+        case 'contains':
+          if (typeof value === 'string' && typeof filterValue === 'string') {
+            return value.toLowerCase().includes(filterValue.toLowerCase());
+          }
+          // Handle arrays (multi-select, people, etc.)
+          if (Array.isArray(value)) {
+            return value.some((item) =>
+              typeof item === 'string' && typeof filterValue === 'string'
+                ? item.toLowerCase().includes(filterValue.toLowerCase())
+                : item === filterValue
+            );
+          }
+          return false;
+
+        case 'not_contains':
+          if (typeof value === 'string' && typeof filterValue === 'string') {
+            return !value.toLowerCase().includes(filterValue.toLowerCase());
+          }
+          if (Array.isArray(value)) {
+            return !value.some((item) =>
+              typeof item === 'string' && typeof filterValue === 'string'
+                ? item.toLowerCase().includes(filterValue.toLowerCase())
+                : item === filterValue
+            );
+          }
+          return true;
+
+        case 'greater_than':
+          if (typeof value === 'number' && typeof filterValue === 'number') {
+            return value > filterValue;
+          }
+          // Handle date comparison
+          if (typeof value === 'string' && typeof filterValue === 'string') {
+            const dateValue = new Date(value);
+            const dateFilter = new Date(filterValue);
+            if (!Number.isNaN(dateValue.getTime()) && !Number.isNaN(dateFilter.getTime())) {
+              return dateValue > dateFilter;
+            }
+          }
+          return false;
+
+        case 'less_than':
+          if (typeof value === 'number' && typeof filterValue === 'number') {
+            return value < filterValue;
+          }
+          // Handle date comparison
+          if (typeof value === 'string' && typeof filterValue === 'string') {
+            const dateValue = new Date(value);
+            const dateFilter = new Date(filterValue);
+            if (!Number.isNaN(dateValue.getTime()) && !Number.isNaN(dateFilter.getTime())) {
+              return dateValue < dateFilter;
+            }
+          }
+          return false;
+
+        default:
+          return true;
+      }
+    });
+  });
 }
 
 function filterByTimeWindow(

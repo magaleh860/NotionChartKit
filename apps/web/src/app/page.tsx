@@ -31,19 +31,19 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
           <div className="p-6 border border-border rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">🔗 Notion Integration</h3>
+            <h3 className="text-lg font-semibold mb-2">Notion Integration</h3>
             <p className="text-sm text-muted-foreground">
               Connect seamlessly with Notion OAuth 2.0
             </p>
           </div>
           <div className="p-6 border border-border rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">📊 Multiple Chart Types</h3>
+            <h3 className="text-lg font-semibold mb-2">Multiple Chart Types</h3>
             <p className="text-sm text-muted-foreground">
               Bar, line, pie, and area charts ready to embed
             </p>
           </div>
           <div className="p-6 border border-border rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">⚡ Auto-Refresh</h3>
+            <h3 className="text-lg font-semibold mb-2">Auto-Refresh</h3>
             <p className="text-sm text-muted-foreground">
               Background workers keep your data up to date
             </p>

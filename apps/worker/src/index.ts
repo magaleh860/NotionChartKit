@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { cleanupCache } from './jobs/cleanup-cache.js';
 import { refreshDatasets } from './jobs/refresh-datasets.js';
 
-console.log('🚀 NotionChartKit Worker started');
+console.log('NotionChartKit Worker started');
 
 // Main worker loop
 async function main() {
@@ -11,12 +11,12 @@ async function main() {
 
   // Run refresh job
   setInterval(async () => {
-    console.log('⏰ Running dataset refresh job...');
+    console.log('Running dataset refresh job...');
     try {
       await refreshDatasets();
-      console.log('✅ Dataset refresh completed');
+      console.log('Dataset refresh completed');
     } catch (error) {
-      console.error('❌ Dataset refresh failed:', error);
+      console.error('Dataset refresh failed:', error);
     }
   }, REFRESH_INTERVAL);
 
@@ -25,31 +25,31 @@ async function main() {
     console.log('🧹 Running cache cleanup job...');
     try {
       await cleanupCache();
-      console.log('✅ Cache cleanup completed');
+      console.log('Cache cleanup completed');
     } catch (error) {
-      console.error('❌ Cache cleanup failed:', error);
+      console.error('Cache cleanup failed:', error);
     }
   }, CLEANUP_INTERVAL);
 
   // Initial run
-  console.log('🔄 Running initial jobs...');
+  console.log('Running initial jobs...');
   await refreshDatasets();
   await cleanupCache();
-  console.log('✅ Initial jobs completed');
+  console.log('Initial jobs completed');
 }
 
 // Handle graceful shutdown
 process.on('SIGINT', () => {
-  console.log('👋 Shutting down worker...');
+  console.log('Shutting down worker...');
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
-  console.log('👋 Shutting down worker...');
+  console.log('Shutting down worker...');
   process.exit(0);
 });
 
 main().catch((error) => {
-  console.error('💥 Worker crashed:', error);
+  console.error('Worker crashed:', error);
   process.exit(1);
 });

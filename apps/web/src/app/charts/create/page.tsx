@@ -42,6 +42,21 @@ function CreateChartContent() {
   const [aggregationType, setAggregationType] = useState<'count' | 'sum' | 'avg'>('count');
   const [valueProperty, setValueProperty] = useState('');
 
+  // Property filters
+  const [filters, setFilters] = useState<
+    Array<{
+      property: string;
+      operator:
+        | 'equals'
+        | 'not_equals'
+        | 'contains'
+        | 'not_contains'
+        | 'greater_than'
+        | 'less_than';
+      value: string;
+    }>
+  >([]);
+
   // Available properties from Notion
   const [availableProperties, setAvailableProperties] = useState<
     Array<{ name: string; type: string }>
@@ -138,6 +153,7 @@ function CreateChartContent() {
                     : {}),
                 }
               : undefined,
+            filters: filters.length > 0 ? filters : undefined,
           },
           isPublic,
         }),
@@ -495,6 +511,150 @@ function CreateChartContent() {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Property Filters */}
+          <div className="border-t pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Property Filters</h3>
+              <button
+                type="button"
+                onClick={() =>
+                  setFilters([...filters, { property: '', operator: 'equals', value: '' }])
+                }
+                className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                disabled={creating}
+              >
+                + Add Filter
+              </button>
+            </div>
+
+            {filters.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                No filters applied. Click "Add Filter" to filter data by property values.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {filters.map((filter, index) => (
+                  <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {/* Property */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Property
+                          </label>
+                          {availableProperties.length > 0 ? (
+                            <select
+                              value={filter.property}
+                              onChange={(e) => {
+                                const newFilters = [...filters];
+                                newFilters[index].property = e.target.value;
+                                setFilters(newFilters);
+                              }}
+                              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              disabled={creating}
+                            >
+                              <option value="">Select property...</option>
+                              {availableProperties.map((prop) => (
+                                <option key={prop.name} value={prop.name}>
+                                  {prop.name}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              value={filter.property}
+                              onChange={(e) => {
+                                const newFilters = [...filters];
+                                newFilters[index].property = e.target.value;
+                                setFilters(newFilters);
+                              }}
+                              placeholder="Property name"
+                              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              disabled={creating}
+                            />
+                          )}
+                        </div>
+
+                        {/* Operator */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Operator
+                          </label>
+                          <select
+                            value={filter.operator}
+                            onChange={(e) => {
+                              const newFilters = [...filters];
+                              newFilters[index].operator = e.target.value as typeof filter.operator;
+                              setFilters(newFilters);
+                            }}
+                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            disabled={creating}
+                          >
+                            <option value="equals">Equals</option>
+                            <option value="not_equals">Not Equals</option>
+                            <option value="contains">Contains</option>
+                            <option value="not_contains">Not Contains</option>
+                            <option value="greater_than">Greater Than</option>
+                            <option value="less_than">Less Than</option>
+                          </select>
+                        </div>
+
+                        {/* Value */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Value
+                          </label>
+                          <input
+                            type="text"
+                            value={filter.value}
+                            onChange={(e) => {
+                              const newFilters = [...filters];
+                              newFilters[index].value = e.target.value;
+                              setFilters(newFilters);
+                            }}
+                            placeholder="Filter value"
+                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            disabled={creating}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Remove button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newFilters = filters.filter((_, i) => i !== index);
+                          setFilters(newFilters);
+                        }}
+                        className="mt-6 p-1.5 text-red-600 hover:bg-red-50 rounded"
+                        disabled={creating}
+                        title="Remove filter"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="mt-2 text-xs text-gray-500">
+              Filters are combined with AND logic - all conditions must match
+            </p>
           </div>
 
           {/* Public Toggle */}

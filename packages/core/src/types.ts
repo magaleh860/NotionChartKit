@@ -14,6 +14,12 @@ export interface NormalizedRow {
   lastEditedTime: string;
 }
 
+export interface PropertyFilter {
+  property: string; // Property name to filter on
+  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than';
+  value: string | number | boolean;
+}
+
 export interface AggregationConfig {
   groupBy?: string;
   aggregateField?: string;
@@ -25,6 +31,8 @@ export interface AggregationConfig {
     customStartDate?: string; // For custom time windows (ISO string)
     customEndDate?: string; // For custom time windows (ISO string)
   };
+  // Property value filtering
+  filters?: PropertyFilter[];
 }
 
 export interface ChartData {

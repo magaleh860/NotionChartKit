@@ -56,6 +56,17 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
         customStartDate?: string;
         customEndDate?: string;
       };
+      filters?: Array<{
+        property: string;
+        operator:
+          | 'equals'
+          | 'not_equals'
+          | 'contains'
+          | 'not_contains'
+          | 'greater_than'
+          | 'less_than';
+        value: string | number | boolean;
+      }>;
     } | null;
 
     // Apply aggregation based on chart configuration
@@ -64,6 +75,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
       aggregationType: metadata?.aggregationType || 'count',
       aggregateField: metadata?.valueProperty,
       timeWindow: metadata?.timeWindow,
+      filters: metadata?.filters,
     });
 
     // Format for Chart.js
