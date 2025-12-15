@@ -72,12 +72,12 @@ chmod +x .git/hooks/pre-commit
 ## Migration from ESLint/Prettier
 
 Already done! We've:
-- ✅ Removed ESLint and Prettier dependencies
-- ✅ Removed old config files (`.eslintrc.js`, `.prettierrc`)
-- ✅ Added `biome.json` configuration
-- ✅ Updated all package.json scripts
-- ✅ Updated CI workflows
-- ✅ Added VS Code settings
+- Removed ESLint and Prettier dependencies
+- Removed old config files (`.eslintrc.js`, `.prettierrc`)
+- Added `biome.json` configuration
+- Updated all package.json scripts
+- Updated CI workflows
+- Added VS Code settings
 
 ## Learn More
 

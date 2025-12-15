@@ -2,7 +2,7 @@
 
 A full-stack charting system for Notion databases. Connect via the Notion API, normalize and aggregate database data, cache results, and serve embeddable charts that update automatically.
 
-## 🧩 Architecture
+## Architecture
 
 - **Framework**: Next.js (App Router) + TypeScript + Tailwind CSS
 - **Backend**: Next.js API routes (serverless) using `@notionhq/client`
@@ -11,7 +11,7 @@ A full-stack charting system for Notion databases. Connect via the Notion API, n
 - **Worker**: Lightweight Node script (CRON or queue) for periodic refreshes
 - **Infra**: Docker Compose (Postgres + Redis) + pnpm workspace + Turborepo
 
-## 🏗️ Monorepo Structure
+## Monorepo Structure
 
 ```
 /apps
@@ -25,7 +25,7 @@ A full-stack charting system for Notion databases. Connect via the Notion API, n
 /docs        → architecture diagrams, ADRs, runbooks
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -64,7 +64,7 @@ NOTION_CLIENT_SECRET=your_client_secret
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-## 📦 Packages
+## Packages
 
 - **@notionchartkit/web** - Next.js frontend and API
 - **@notionchartkit/worker** - Background refresh worker
@@ -72,7 +72,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - **@notionchartkit/contracts** - Shared Zod schemas
 - **@notionchartkit/db** - Prisma database client
 
-## 🛠️ Development
+## Development
 
 ```bash
 # Run all apps in development mode
@@ -94,29 +94,29 @@ pnpm format
 pnpm type-check
 ```
 
-## 🧪 Testing
+## Testing
 
 ```bash
 pnpm test
 ```
 
-## 🚢 Deployment
+## Deployment
 
 See [docs/deployment.md](./docs/deployment.md) for deployment instructions.
 
-## 📚 Documentation
+## Documentation
 
 - [Architecture](./docs/architecture.md)
 - [API Reference](./docs/api.md)
 - [Runbooks](./docs/runbooks.md)
 
-## 🧠 What This Demonstrates
+## What This Demonstrates
 
 - Full-stack TypeScript (Next + Node + Postgres + Redis)
 - OAuth 2.0, caching, background jobs, and API design
 - Shared contracts and types across frontend/backend
 - Real-world architecture in a clean, portable monorepo
 
-## 📄 License
+## License
 
 MIT

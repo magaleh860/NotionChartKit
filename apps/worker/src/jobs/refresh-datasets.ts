@@ -48,9 +48,9 @@ export async function refreshDatasets() {
           data: { lastRefreshedAt: new Date() },
         });
 
-        console.log(`✅ Dataset ${dataset.id} refreshed successfully`);
+        console.log(`Dataset ${dataset.id} refreshed successfully`);
       } catch (error) {
-        console.error(`❌ Failed to refresh dataset ${dataset.id}:`, error);
+        console.error(`Failed to refresh dataset ${dataset.id}:`, error);
         // Continue with other datasets even if one fails
       }
     }
