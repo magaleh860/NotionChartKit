@@ -1,4 +1,4 @@
-// This is your Prisma schema file
+// Prisma schema file - defines database structure and generates type-safe client
 // Learn more: https://pris.ly/d/prisma-schema
 
 generator client {

@@ -1,27 +1,27 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local"],
+  "globalDependencies": ["**/.env.*local"], // Invalidate cache when env files change
   "pipeline": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "dependsOn": ["^build"], // ^ = Build workspace dependencies first (core, contracts, db before web/worker)
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"] // Cache these build outputs for faster rebuilds
     },
     "dev": {
-      "cache": false,
-      "persistent": true
+      "cache": false, // Always run fresh - dev servers shouldn't use cache
+      "persistent": true // Keep dev servers running (don't terminate after startup)
     },
     "lint": {
-      "dependsOn": ["^build"],
-      "cache": false
+      "dependsOn": ["^build"], // Ensure packages are built before linting
+      "cache": false // Always lint fresh to catch new issues
     },
     "type-check": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"] // Type-check after dependencies are built
     },
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"] // Run tests after dependencies are built
     },
     "clean": {
-      "cache": false
+      "cache": false // Always run clean, never cache deletion tasks
     }
   }
 }

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// Basically stores the query used to query data from Notion API
 export const DatasetConfigSchema = z.object({
   databaseId: z.string(),
   filters: z.any().optional(),
@@ -9,6 +10,7 @@ export const DatasetConfigSchema = z.object({
   aggregationType: z.enum(['sum', 'count', 'avg', 'min', 'max']).optional(),
 });
 
+// Metadata about the dataset
 export const DatasetSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),

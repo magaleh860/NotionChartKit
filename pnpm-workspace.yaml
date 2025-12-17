@@ -1,3 +1,4 @@
+# pnpm workspace configuration - defines monorepo structure for local package linking
 packages:
-  - 'apps/*'
-  - 'packages/*'
+  - 'apps/*'      # Applications (web, worker) - deployable services
+  - 'packages/*'  # Shared packages (core, contracts, db) - internal libraries

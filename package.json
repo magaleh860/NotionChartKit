@@ -16,6 +16,8 @@
     "db:generate": "pnpm --filter @notionchartkit/db generate",
     "db:push": "pnpm --filter @notionchartkit/db push",
     "db:migrate": "pnpm --filter @notionchartkit/db migrate",
+    "db:studio": "pnpm --filter @notionchartkit/db studio",
+    "db:seed": "pnpm --filter @notionchartkit/db seed",
     "docker:up": "docker compose -f infra/docker-compose.yml up -d",
     "docker:down": "docker compose -f infra/docker-compose.yml down"
   },

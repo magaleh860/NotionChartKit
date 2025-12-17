@@ -1,18 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "incremental": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true
+    "target": "ES2022", // Compile to modern JavaScript (async/await, optional chaining, etc.)
+    "lib": ["ES2022"], // Include ES2022 standard library types
+    "module": "ESNext", // Use modern ES modules (import/export)
+    "moduleResolution": "bundler", // Modern module resolution for Turborepo/Next.js builds
+    "strict": true, // Enable all strict type-checking options (catches more bugs)
+    "esModuleInterop": true, // Allow default imports from CommonJS modules
+    "skipLibCheck": true, // Skip type-checking of declaration files for faster builds
+    "forceConsistentCasingInFileNames": true, // Prevent case-sensitivity issues across OS (Windows vs Linux)
+    "resolveJsonModule": true, // Allow importing .json files as modules
+    "isolatedModules": true, // Ensure each file can be transpiled independently (required for build tools)
+    "incremental": true, // Save compilation state for faster subsequent builds
+    "noUnusedLocals": true, // Error on unused local variables (cleaner code)
+    "noUnusedParameters": true, // Error on unused function parameters (cleaner code)
+    "noImplicitReturns": true // Ensure all code paths in functions return a value
   }
 }
